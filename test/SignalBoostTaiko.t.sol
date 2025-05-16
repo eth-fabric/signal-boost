@@ -2,32 +2,32 @@
 pragma solidity ^0.8.28;
 
 import {Test} from "forge-std/Test.sol";
-import {SignalBoostOpStack} from "../src/SignalBoostImpl.sol";
+import {SignalBoostTaiko} from "../src/SignalBoostImpl.sol";
 import {SignalReceiver} from "../src/SignalReceiver.sol";
 import {SignalProver} from "../src/SignalProver.sol";
 import {ISignalBoost} from "../src/ISignalBoost.sol";
-import {DummyViewContract, DummyCrossDomainMessenger, L2PriceFeed} from "./DummyContracts.sol";
+import {DummyViewContract, DummySignalService, L2PriceFeed} from "./DummyContracts.sol";
 
-contract SignalBoostOpStackTest is Test {
-    SignalBoostOpStack public signalBoost;
+contract SignalBoostTaikoTest is Test {
+    SignalBoostTaiko public signalBoost;
     DummyViewContract public dummyContract;
-    DummyCrossDomainMessenger public crossDomainMessenger;
+    DummySignalService public signalService;
     SignalReceiver public signalReceiver;
     SignalProver public signalProver;
     L2PriceFeed public priceFeed;
 
     function setUp() public {
-        // L1 contract that signals are sent to
-        crossDomainMessenger = new DummyCrossDomainMessenger();
-
         // L2 contract that receives the signals
         signalReceiver = new SignalReceiver();
+
+        // L1 contract that signals are sent to
+        signalService = new DummySignalService(address(signalReceiver));
 
         // L2 contract that proves outputs based on signals
         signalProver = new SignalProver(address(signalReceiver));
 
-        // L1 contract to batch signals for the l1Signaler
-        signalBoost = new SignalBoostOpStack(address(crossDomainMessenger), address(signalReceiver));
+        // L1 contract to batch signals for the L1 SignalService contract
+        signalBoost = new SignalBoostTaiko(address(signalService));
 
         // The test contract that we can call view functions on
         dummyContract = new DummyViewContract();

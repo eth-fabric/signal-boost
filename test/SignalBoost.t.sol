@@ -2,7 +2,7 @@
 pragma solidity ^0.8.28;
 
 import {Test} from "forge-std/Test.sol";
-import {DummyViewContract} from "./DummyViewContract.sol";
+import {DummyViewContract} from "./DummyContracts.sol";
 import {SignalBoost} from "../src/SignalBoost.sol";
 import {ISignalBoost} from "../src/ISignalBoost.sol";
 import {MerkleTree} from "../src/lib/MerkleTree.sol";
@@ -10,7 +10,7 @@ import {MerkleTree} from "../src/lib/MerkleTree.sol";
 contract SignalBoostTester is SignalBoost {
     bytes32 public lastSignal;
 
-    constructor(address signalReceiver_) SignalBoost(signalReceiver_) {}
+    constructor() SignalBoost() {}
 
     // dummy implementation for testing
     function _sendSignal(bytes32 signal) internal override {
@@ -21,11 +21,9 @@ contract SignalBoostTester is SignalBoost {
 contract SignalBoostTest is Test {
     SignalBoostTester public signalBoost;
     DummyViewContract public dummyContract;
-    address public signalReceiver;
 
     function setUp() public {
-        signalReceiver = makeAddr("signalReceiver");
-        signalBoost = new SignalBoostTester(signalReceiver);
+        signalBoost = new SignalBoostTester();
         dummyContract = new DummyViewContract();
     }
 
@@ -61,7 +59,7 @@ contract SignalBoostTest is Test {
     }
 
     function test_WriteSignals() public {
-        (ISignalBoost.SignalRequest[] memory requests, bytes32 root) = writeSignals();
+        (, bytes32 root) = writeSignals();
         // Verify that a signal was stored
         assertTrue(signalBoost.lastSignal() != bytes32(0));
         assertEq(signalBoost.lastSignal(), root);
