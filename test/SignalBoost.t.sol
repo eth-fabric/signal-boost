@@ -10,33 +10,29 @@ import {MerkleTree} from "../src/lib/MerkleTree.sol";
 contract SignalBoostTester is SignalBoost {
     bytes32 public lastSignal;
 
-    constructor(address signalReceiver_, address owner_) 
-        SignalBoost(signalReceiver_, owner_) 
-    {}
+    constructor(address signalReceiver_) SignalBoost(signalReceiver_) {}
 
     // dummy implementation for testing
     function _sendSignal(bytes32 signal) internal override {
         lastSignal = signal;
     }
-} 
+}
 
 contract SignalBoostTest is Test {
     SignalBoostTester public signalBoost;
     DummyViewContract public dummyContract;
-    address public owner;
     address public signalReceiver;
 
     function setUp() public {
-        owner = makeAddr("owner");
         signalReceiver = makeAddr("signalReceiver");
-        signalBoost = new SignalBoostTester(signalReceiver, owner);
+        signalBoost = new SignalBoostTester(signalReceiver);
         dummyContract = new DummyViewContract();
     }
 
     function writeSignals() internal returns (ISignalBoost.SignalRequest[] memory, bytes32) {
         // Create signal requests for all three view functions
         ISignalBoost.SignalRequest[] memory requests = new ISignalBoost.SignalRequest[](3);
-        
+
         // Request for getDummyUint
         requests[0] = ISignalBoost.SignalRequest({
             target: address(dummyContract),
@@ -77,7 +73,7 @@ contract SignalBoostTest is Test {
 
         // Get the individual signal hashes
         bytes32[] memory signals = new bytes32[](3);
-        
+
         // Get uint256 signal
         bytes memory output0 = abi.encode(dummyContract.getDummyUint());
         signals[0] = keccak256(abi.encode(requests[0], output0));

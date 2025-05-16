@@ -8,9 +8,9 @@ abstract contract SignalBoost is ISignalBoost {
     address _signalReceiver;
     address private _owner;
 
-    constructor(address signalReceiver_, address owner_) {
+    constructor(address signalReceiver_) {
         _signalReceiver = signalReceiver_;
-        _owner = owner_;
+        _owner = msg.sender;
     }
 
     // Function in SignalBoost L1 contract

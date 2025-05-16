@@ -17,4 +17,4 @@ contract DummyViewContract {
     function getDummyBytes32() external view returns (bytes32) {
         return _dummyBytes32;
     }
-} 
+}
