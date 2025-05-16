@@ -5,11 +5,11 @@ import {ISignalBoost} from "./ISignalBoost.sol";
 import {MerkleTree} from "./lib/MerkleTree.sol";
 
 abstract contract SignalBoost is ISignalBoost {
-    address private _l1Signaler;
+    address _signalReceiver;
     address private _owner;
 
-    constructor(address l1Signaler_, address owner_) {
-        _l1Signaler = l1Signaler_;
+    constructor(address signalReceiver_, address owner_) {
+        _signalReceiver = signalReceiver_;
         _owner = owner_;
     }
 
@@ -40,9 +40,9 @@ abstract contract SignalBoost is ISignalBoost {
         emit SignalSent(signalRequestsRoot);
     }
 
-    function setL1Signaler(address signaler_) external {
+    function setSignalReceiver(address signalReceiver_) external {
         if (msg.sender != _owner) revert NotOwner();
-        _l1Signaler = signaler_;
+        _signalReceiver = signalReceiver_;
     }
 
     // internal functions
@@ -58,7 +58,7 @@ abstract contract SignalBoost is ISignalBoost {
     function _sendSignal(bytes32 signal) internal virtual {}
 
     // view functions
-    function l1Signaler() external view returns (address) {
-        return _l1Signaler;
+    function signalReceiver() external view returns (address) {
+        return _signalReceiver;
     }
 }

@@ -13,8 +13,8 @@ interface ISignalBoost {
     }
 
     function writeSignals(SignalRequest[] calldata requests) external returns (bytes32 signalRequestsRoot);
-    function setL1Signaler(address signaler_) external;
-    function l1Signaler() external view returns (address);
+    function setSignalReceiver(address signalReceiver_) external;
+    function signalReceiver() external view returns (address);
 
     event SignalHashed(bytes32 signal, SignalRequest request, bytes output);
     event SignalSent(bytes32 signalRequestsRoot);
