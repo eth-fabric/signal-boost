@@ -12,7 +12,7 @@ interface ISignalBoost {
         bytes input;
     }
 
-    function writeSignals(SignalRequest[] memory requests) external returns (bytes32 signalRequestsRoot);
+    function writeSignals(SignalRequest[] calldata requests) external returns (bytes32 signalRequestsRoot);
     function setL1Signaler(address signaler_) external;
     function l1Signaler() external view returns (address);
 

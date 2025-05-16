@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import {ISignalBoost} from "./ISignalBoost.sol";
+import {IBatcher} from "./IBatcher.sol";
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 
-abstract contract SignalBoost is ISignalBoost {
+contract Batcher is IBatcher {
     uint256 private _nonce;
 
     /**
@@ -26,26 +26,15 @@ abstract contract SignalBoost is ISignalBoost {
      * The signature must be produced off–chain by signing:
      * The signing key should be the account's key (which becomes the smart account's own identity after upgrade).
      */
-    function executeBatchWithSig(
-        Call[] calldata calls,
-        bytes calldata signature
-    ) external {
+    function executeBatchWithSig(Call[] calldata calls, bytes calldata signature) external {
         // Compute the digest that the account was expected to sign.
         bytes memory encodedCalls;
         for (uint256 i = 0; i < calls.length; i++) {
-            encodedCalls = abi.encodePacked(
-                encodedCalls,
-                calls[i].to,
-                calls[i].value,
-                calls[i].data,
-                calls[i].batcher
-            );
+            encodedCalls = abi.encodePacked(encodedCalls, calls[i].to, calls[i].value, calls[i].data, calls[i].batcher);
         }
         bytes32 digest = keccak256(abi.encodePacked(_nonce, encodedCalls));
 
-        bytes32 ethSignedMessageHash = MessageHashUtils.toEthSignedMessageHash(
-            digest
-        );
+        bytes32 ethSignedMessageHash = MessageHashUtils.toEthSignedMessageHash(digest);
 
         // Recover the signer from the provided signature.
         address recovered = ECDSA.recover(ethSignedMessageHash, signature);
@@ -73,7 +62,7 @@ abstract contract SignalBoost is ISignalBoost {
     function _executeCall(Call calldata call) internal {
         if (call.batcher != msg.sender) revert BatcherMismatch();
 
-        (bool success, ) = call.to.call{value: call.value}(call.data);
+        (bool success,) = call.to.call{value: call.value}(call.data);
         if (!success) revert CallReverted();
 
         emit CallExecuted(msg.sender, call.to, call.value, call.data);

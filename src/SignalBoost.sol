@@ -14,20 +14,15 @@ abstract contract SignalBoost is ISignalBoost {
     }
 
     // Function in SignalBoost L1 contract
-    function writeSignals(SignalRequest[] memory requests) external returns (bytes32 signalRequestsRoot) {
+    function writeSignals(SignalRequest[] calldata requests) external returns (bytes32 signalRequestsRoot) {
         bytes32[] memory signals = new bytes32[](requests.length);
 
         for (uint256 i = 0; i < requests.length; i++) {
             // Encode the call using selector and input
-            bytes memory payload = abi.encodeWithSelector(
-                requests[i].selector,
-                requests[i].input
-            );
+            bytes memory payload = abi.encodeWithSelector(requests[i].selector, requests[i].input);
 
             // Call the view function
-            (bool success, bytes memory output) = requests[i].target.staticcall(
-                payload
-            );
+            (bool success, bytes memory output) = requests[i].target.staticcall(payload);
             if (!success) revert StaticCallReverted();
 
             // Create Merkle leaf
@@ -51,10 +46,7 @@ abstract contract SignalBoost is ISignalBoost {
     }
 
     // internal functions
-    function _hashSignal(
-        SignalRequest calldata request,
-        bytes memory output
-    ) internal pure returns (bytes32) {
+    function _hashSignal(SignalRequest calldata request, bytes memory output) internal pure returns (bytes32) {
         bytes32 signal = keccak256(abi.encode(request, output));
         return signal;
     }
@@ -68,9 +60,5 @@ abstract contract SignalBoost is ISignalBoost {
     // view functions
     function l1Signaler() external view returns (address) {
         return _l1Signaler;
-    }
-
-    function nonce() external view returns (uint256) {
-        return _nonce;
     }
 }

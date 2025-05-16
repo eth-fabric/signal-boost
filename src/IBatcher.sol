@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-interface ISignalBoost {
+interface IBatcher {
     /// @notice Request for an L1 contract to be batched.
     struct Call {
         /// @notice The address to call.
@@ -19,19 +19,11 @@ interface ISignalBoost {
     }
 
     function executeBatch(Call[] calldata calls) external;
-    function executeBatchWithSig(
-        Call[] calldata calls,
-        bytes calldata signature
-    ) external;
+    function executeBatchWithSig(Call[] calldata calls, bytes calldata signature) external;
     function nonce() external view returns (uint256);
 
     /// @notice Emitted for every individual call executed.
-    event CallExecuted(
-        address indexed sender,
-        address indexed to,
-        uint256 value,
-        bytes data
-    );
+    event CallExecuted(address indexed sender, address indexed to, uint256 value, bytes data);
     /// @notice Emitted when a full batch is executed.
     event BatchExecuted(uint256 indexed nonce, Call[] calls);
 
