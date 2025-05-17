@@ -2,21 +2,10 @@
 pragma solidity ^0.8.28;
 
 import {Test} from "forge-std/Test.sol";
-import {DummyViewContract} from "./DummyContracts.sol";
+import {DummyViewContract, SignalBoostTester} from "./DummyContracts.sol";
 import {SignalBoost} from "../src/SignalBoost.sol";
 import {ISignalBoost} from "../src/ISignalBoost.sol";
 import {MerkleTree} from "../src/lib/MerkleTree.sol";
-
-contract SignalBoostTester is SignalBoost {
-    bytes32 public lastSignal;
-
-    constructor() SignalBoost() {}
-
-    // dummy implementation for testing
-    function _sendSignal(bytes32 signal) internal override {
-        lastSignal = signal;
-    }
-}
 
 contract SignalBoostTest is Test {
     SignalBoostTester public signalBoost;

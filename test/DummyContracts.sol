@@ -1,10 +1,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
+import {SignalBoost} from "../src/SignalBoost.sol";
 import {ISignalReceiver} from "../src/ISignalReceiver.sol";
 import {ISignalBoost} from "../src/ISignalBoost.sol";
 import {ISignalProver} from "../src/ISignalProver.sol";
 import {ISignalService, ICrossDomainMessenger} from "../src/SignalBoostImpl.sol";
+
+contract SignalBoostTester is SignalBoost {
+    bytes32 public lastSignal;
+
+    constructor() SignalBoost() {}
+
+    // dummy implementation for testing
+    function _sendSignal(bytes32 signal) internal override {
+        lastSignal = signal;
+    }
+}
 
 contract DummyViewContract {
     uint256 private _dummyUint = 42;
