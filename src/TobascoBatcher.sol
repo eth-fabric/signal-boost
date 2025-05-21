@@ -7,7 +7,7 @@ import {Tobasco} from "tobasco/src/Tobasco.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 
-contract TobascoBatcher is BatcherBase, ITobascoBatcher, Tobasco {
+contract TobascoBatcher is ITobascoBatcher, Tobasco, BatcherBase {
     /**
      * @notice Executes a batch of calls initiated by the account owner.
      * @param calls An array of Call structs containing destination, ETH value, and calldata.
