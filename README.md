@@ -1,66 +1,20 @@
-## Foundry
+## Signal-Boost
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+**Signal-Boost is a PoC implementation of the ideas in the [Signal-Boost](https://ethresear.ch/t/signal-boost-l1-interop-plugin-for-rollups/22354) ethresearch post.**
 
-Foundry consists of:
+![](images/logo.png)
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+### Summary
+Signal-Boost is a set of L1 contracts for rollups to synchronously read L1 data in real-time. It provides a way to batch and verify signals (data) from L1 to L2, with support for top-of-block inclusion and multiple rollup stacks (Taiko and OP Stack).
 
-## Documentation
+### Core Contracts
+- **SignalBoost.sol**: The main contract that queries L1 view function, batches outputs, then broadcasts a signal to the rollup's L1 contract.
+- **SignalProver.sol**: Allows the raw view function data to be written to L2 state if it is proven against the committed signal.
+- **SignalReceiver.sol**: L2 contract that receives and stores signals from L1. Acts as the bridge for cross-domain communication. Each rollup is expected to have its own implementation.
+- **Batcher.sol**: Basic EIP-7702 batcher implementation to execute multiple transactions atomically.
+- **TobascoBatcher.sol**: EIP-7702 batcher implementation that enforces top-of-block inclusion utilizing [Tobasco](https://github.com/eth-fabric/tobasco).
 
-https://book.getfoundry.sh/
+### Implementation Variants
 
-## Usage
-
-### Build
-
-```shell
-$ forge build
-```
-
-### Test
-
-```shell
-$ forge test
-```
-
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+- **SignalBoostTaiko.sol**: Taiko-specific implementation that uses Taiko's `SignalService` for cross-chain messaging.
+- **SignalBoostOpStack.sol**: OP Stack-specific implementation that uses Optimism's `CrossDomainMessenger` for cross-chain messaging.
