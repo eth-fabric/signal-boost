@@ -5,7 +5,7 @@ import {Test} from "forge-std/Test.sol";
 import {SignalBoostOpStack} from "../src/SignalBoostImpl.sol";
 import {SignalReceiver} from "../src/SignalReceiver.sol";
 import {SignalProver} from "../src/SignalProver.sol";
-import {ISignalBoost} from "../src/ISignalBoost.sol";
+import {ISignalBoost} from "../src/interfaces/ISignalBoost.sol";
 import {DummyViewContract, DummyCrossDomainMessenger, L2PriceFeed} from "./DummyContracts.sol";
 
 contract SignalBoostOpStackTest is Test {

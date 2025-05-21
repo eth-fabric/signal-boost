@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import {ISignalBoost} from "./ISignalBoost.sol";
+import {ISignalBoost} from "./interfaces/ISignalBoost.sol";
 import {MerkleTree} from "./lib/MerkleTree.sol";
 
 abstract contract SignalBoost is ISignalBoost {

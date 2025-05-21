@@ -5,8 +5,9 @@ import {Test, console} from "forge-std/Test.sol";
 
 import {Test} from "forge-std/Test.sol";
 import {SignalBoost} from "../src/SignalBoost.sol";
-import {ISignalBoost} from "../src/ISignalBoost.sol";
-import {IBatcher} from "../src/IBatcher.sol";
+import {ISignalBoost} from "../src/interfaces/ISignalBoost.sol";
+import {IBatcher} from "../src/interfaces/IBatcher.sol";
+import {IBatcherBase} from "../src/interfaces/IBatcherBase.sol";
 import {Batcher} from "../src/Batcher.sol";
 import {MerkleTree} from "../src/lib/MerkleTree.sol";
 import {SignalBoostTester} from "./DummyContracts.sol";
@@ -126,9 +127,9 @@ contract BasicBatcherTest is BatcherHelpers {
         // Alice pre-signs an ETH transfer to Bob
         address dest1 = makeAddr("dest1");
         address dest2 = makeAddr("dest2");
-        IBatcher.Call[] memory calls = new IBatcher.Call[](2);
-        calls[0] = IBatcher.Call({to: dest1, value: 1 ether, data: "", batcher: alice});
-        calls[1] = IBatcher.Call({to: dest2, value: 1 ether, data: "", batcher: alice});
+        IBatcherBase.Call[] memory calls = new IBatcherBase.Call[](2);
+        calls[0] = IBatcherBase.Call({to: dest1, value: 1 ether, data: "", batcher: alice});
+        calls[1] = IBatcherBase.Call({to: dest2, value: 1 ether, data: "", batcher: alice});
 
         // Alice submits the call
         vm.prank(alice);
@@ -147,9 +148,9 @@ contract BasicBatcherTest is BatcherHelpers {
         address dest2 = makeAddr("dest2");
 
         // Create two transfer calls
-        IBatcher.Call[] memory calls = new IBatcher.Call[](2);
-        calls[0] = IBatcher.Call({to: dest1, value: 1 ether, data: "", batcher: bob});
-        calls[1] = IBatcher.Call({to: dest2, value: 1 ether, data: "", batcher: bob});
+        IBatcherBase.Call[] memory calls = new IBatcherBase.Call[](2);
+        calls[0] = IBatcherBase.Call({to: dest1, value: 1 ether, data: "", batcher: bob});
+        calls[1] = IBatcherBase.Call({to: dest2, value: 1 ether, data: "", batcher: bob});
 
         // Encode and sign the batch
         bytes memory signature = signBatch(alicePrivateKey, calls, IBatcher(address(alice)).nonce());
@@ -170,15 +171,15 @@ contract BasicBatcherTest is BatcherHelpers {
         address batcher = makeAddr("batcher");
 
         // Create a transfer call
-        IBatcher.Call[] memory calls = new IBatcher.Call[](1);
-        calls[0] = IBatcher.Call({to: batcher, value: 1 ether, data: "", batcher: batcher});
+        IBatcherBase.Call[] memory calls = new IBatcherBase.Call[](1);
+        calls[0] = IBatcherBase.Call({to: batcher, value: 1 ether, data: "", batcher: batcher});
 
         // Encode and sign the batch
         bytes memory signature = signBatch(alicePrivateKey, calls, IBatcher(address(alice)).nonce());
 
         // Execute the batch
         vm.prank(bob); // bob executes instead of batcher
-        vm.expectRevert(IBatcher.BatcherMismatch.selector);
+        vm.expectRevert(IBatcherBase.BatcherMismatch.selector);
         IBatcher(address(alice)).executeBatchWithSig(calls, signature);
     }
 
@@ -190,20 +191,20 @@ contract BasicBatcherTest is BatcherHelpers {
         address dest2 = makeAddr("dest2");
 
         // Create two transfer calls
-        IBatcher.Call[] memory calls = new IBatcher.Call[](2);
-        calls[0] = IBatcher.Call({to: dest1, value: 1 ether, data: "", batcher: bob});
-        calls[1] = IBatcher.Call({to: dest2, value: 1 ether, data: "", batcher: bob});
+        IBatcherBase.Call[] memory calls = new IBatcherBase.Call[](2);
+        calls[0] = IBatcherBase.Call({to: dest1, value: 1 ether, data: "", batcher: bob});
+        calls[1] = IBatcherBase.Call({to: dest2, value: 1 ether, data: "", batcher: bob});
 
         // Encode and sign the batch
         bytes memory signature = signBatch(alicePrivateKey, calls, IBatcher(address(alice)).nonce());
 
         // Attempt to unbatch the 2nd call
-        IBatcher.Call[] memory calls2 = new IBatcher.Call[](1);
+        IBatcherBase.Call[] memory calls2 = new IBatcherBase.Call[](1);
         calls2[0] = calls[0];
 
         // Execute the batch
         vm.prank(bob); // bob executes on behalf of alice
-        vm.expectRevert(IBatcher.InvalidSignature.selector);
+        vm.expectRevert(IBatcherBase.InvalidSignature.selector);
         IBatcher(address(alice)).executeBatchWithSig(calls2, signature);
     }
 
@@ -215,8 +216,8 @@ contract BasicBatcherTest is BatcherHelpers {
         address charlie = makeAddr("charlie");
 
         // Bob pre-signs an ETH transfer to Charlie
-        IBatcher.Call[] memory subCalls = new IBatcher.Call[](1);
-        subCalls[0] = IBatcher.Call({
+        IBatcherBase.Call[] memory subCalls = new IBatcherBase.Call[](1);
+        subCalls[0] = IBatcherBase.Call({
             to: charlie,
             value: 1 ether,
             data: "",
@@ -226,19 +227,19 @@ contract BasicBatcherTest is BatcherHelpers {
 
         // Verify this call cannot be sent as a standalone batch
         vm.prank(bob);
-        vm.expectRevert(IBatcher.BatcherMismatch.selector);
+        vm.expectRevert(IBatcherBase.BatcherMismatch.selector);
         IBatcher(address(bob)).executeBatchWithSig(subCalls, subSignature);
 
         // Encode Bob's eth transfer as an executeBatch() call that will be executed in Alice's batch
-        IBatcher.Call[] memory calls = new IBatcher.Call[](2);
-        calls[0] = IBatcher.Call({
+        IBatcherBase.Call[] memory calls = new IBatcherBase.Call[](2);
+        calls[0] = IBatcherBase.Call({
             to: bob,
             value: 0,
             data: abi.encodeCall(IBatcher.executeBatchWithSig, (subCalls, subSignature)),
             batcher: alice // alice will submit her own batch
         });
 
-        calls[1] = IBatcher.Call({
+        calls[1] = IBatcherBase.Call({
             to: charlie,
             value: 1 ether,
             data: "",
@@ -302,10 +303,10 @@ contract BatcherWithSignalBoostTest is BatcherHelpers {
         uint256 price = 42;
 
         // Start the batch
-        IBatcher.Call[] memory calls = new IBatcher.Call[](2);
+        IBatcherBase.Call[] memory calls = new IBatcherBase.Call[](2);
 
         // Set the oracle's price to 42 as a transaction in the batch
-        calls[0] = IBatcher.Call({
+        calls[0] = IBatcherBase.Call({
             to: address(l1Oracle),
             value: 0,
             data: abi.encodeWithSelector(l1Oracle.setPrice.selector, price),
@@ -321,7 +322,7 @@ contract BatcherWithSignalBoostTest is BatcherHelpers {
         });
 
         // Add call to SignalBoost.writeSignals() to batch
-        calls[1] = IBatcher.Call({
+        calls[1] = IBatcherBase.Call({
             to: address(signalBoost),
             value: 0,
             data: abi.encodeWithSelector(signalBoost.writeSignals.selector, requests),

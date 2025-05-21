@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import {ISignalReceiver} from "./ISignalReceiver.sol";
+import {ISignalReceiver} from "./interfaces/ISignalReceiver.sol";
 
 contract SignalReceiver is ISignalReceiver {
     mapping(bytes32 signal => bool received) private _signals;

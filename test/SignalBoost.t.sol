@@ -4,7 +4,7 @@ pragma solidity ^0.8.28;
 import {Test} from "forge-std/Test.sol";
 import {DummyViewContract, SignalBoostTester} from "./DummyContracts.sol";
 import {SignalBoost} from "../src/SignalBoost.sol";
-import {ISignalBoost} from "../src/ISignalBoost.sol";
+import {ISignalBoost} from "../src/interfaces/ISignalBoost.sol";
 import {MerkleTree} from "../src/lib/MerkleTree.sol";
 
 contract SignalBoostTest is Test {

@@ -2,17 +2,20 @@
 pragma solidity ^0.8.28;
 
 import {BatcherBase} from "./BatcherBase.sol";
-import {IBatcher} from "./interfaces/IBatcher.sol";
+import {ITobascoBatcher} from "./interfaces/ITobascoBatcher.sol";
+import {Tobasco} from "tobasco/src/Tobasco.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 
-contract Batcher is BatcherBase, IBatcher {
+contract TobascoBatcher is BatcherBase, ITobascoBatcher, Tobasco {
     /**
-     * /**
      * @notice Executes a batch of calls initiated by the account owner.
      * @param calls An array of Call structs containing destination, ETH value, and calldata.
      */
-    function executeBatch(Call[] calldata calls) external {
+    function executeBatch(Call[] calldata calls, uint256 _expectedBlockNumber)
+        external
+        onlyTopOfBlock(_expectedBlockNumber)
+    {
         if (msg.sender != address(this)) revert NotOwner();
         _executeBatch(calls);
     }
@@ -25,7 +28,10 @@ contract Batcher is BatcherBase, IBatcher {
      * The signature must be produced off–chain by signing:
      * The signing key should be the account's key (which becomes the smart account's own identity after upgrade).
      */
-    function executeBatchWithSig(Call[] calldata calls, bytes calldata signature) external {
+    function executeBatchWithSig(Call[] calldata calls, bytes calldata signature, uint256 _expectedBlockNumber)
+        external
+        onlyTopOfBlock(_expectedBlockNumber)
+    {
         // Compute the digest that the account was expected to sign.
         bytes memory encodedCalls;
         for (uint256 i = 0; i < calls.length; i++) {

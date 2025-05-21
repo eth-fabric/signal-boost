@@ -2,9 +2,9 @@
 pragma solidity ^0.8.28;
 
 import {SignalBoost} from "../src/SignalBoost.sol";
-import {ISignalReceiver} from "../src/ISignalReceiver.sol";
-import {ISignalBoost} from "../src/ISignalBoost.sol";
-import {ISignalProver} from "../src/ISignalProver.sol";
+import {ISignalReceiver} from "../src/interfaces/ISignalReceiver.sol";
+import {ISignalBoost} from "../src/interfaces/ISignalBoost.sol";
+import {ISignalProver} from "../src/interfaces/ISignalProver.sol";
 import {ISignalService, ICrossDomainMessenger} from "../src/SignalBoostImpl.sol";
 
 contract SignalBoostTester is SignalBoost {

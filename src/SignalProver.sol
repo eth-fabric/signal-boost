@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import {ISignalBoost} from "./ISignalBoost.sol";
-import {ISignalProver} from "./ISignalProver.sol";
-import {ISignalReceiver} from "./ISignalReceiver.sol";
+import {ISignalBoost} from "./interfaces/ISignalBoost.sol";
+import {ISignalProver} from "./interfaces/ISignalProver.sol";
+import {ISignalReceiver} from "./interfaces/ISignalReceiver.sol";
 import {MerkleTree} from "./lib/MerkleTree.sol";
 
 // Contract that verifies signals against the stored root
