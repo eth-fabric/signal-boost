@@ -2,12 +2,12 @@
 pragma solidity ^0.8.28;
 
 import {ISignalBoost} from "./interfaces/ISignalBoost.sol";
-import {MerkleTree} from "./lib/MerkleTree.sol";
 
 abstract contract SignalBoost is ISignalBoost {
     // Function in SignalBoost L1 contract
     function writeSignals(SignalRequest[] calldata requests) external returns (bytes32 signalRequestsRoot) {
         bytes32[] memory signals = new bytes32[](requests.length);
+        bytes[] memory outputs = new bytes[](requests.length);
 
         for (uint256 i = 0; i < requests.length; i++) {
             // Encode the call using selector and input
@@ -17,25 +17,16 @@ abstract contract SignalBoost is ISignalBoost {
             (bool success, bytes memory output) = requests[i].target.staticcall(payload);
             if (!success) revert StaticCallReverted();
 
-            // Create Merkle leaf
-            signals[i] = _hashSignal(requests[i], output);
-
-            emit SignalHashed(signals[i], requests[i], output);
+            outputs[i] = output;
         }
 
-        // Merklize the signals
-        signalRequestsRoot = MerkleTree.generateTree(signals);
+        // Hash the requests and outputs
+        signalRequestsRoot = keccak256(abi.encode(requests, outputs));
 
         // Write the root to the L1 signaler contract
         _sendSignal(signalRequestsRoot);
 
         emit SignalSent(signalRequestsRoot);
-    }
-
-    // internal functions
-    function _hashSignal(SignalRequest calldata request, bytes memory output) internal pure returns (bytes32) {
-        bytes32 signal = keccak256(abi.encode(request, output));
-        return signal;
     }
 
     // @dev This function is called by the writeSignals function.

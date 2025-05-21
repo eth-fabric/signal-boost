@@ -4,7 +4,6 @@ pragma solidity ^0.8.28;
 import {ISignalBoost} from "./interfaces/ISignalBoost.sol";
 import {ISignalProver} from "./interfaces/ISignalProver.sol";
 import {ISignalReceiver} from "./interfaces/ISignalReceiver.sol";
-import {MerkleTree} from "./lib/MerkleTree.sol";
 
 // Contract that verifies signals against the stored root
 contract SignalProver is ISignalProver {
@@ -21,17 +20,11 @@ contract SignalProver is ISignalProver {
     function proveSignals(ISignalBoost.SignalRequest[] calldata requests, bytes[] calldata outputs) external {
         if (requests.length != outputs.length) revert InputLengthMismatch();
 
-        // Generate signal hashes
-        bytes32[] memory signals = new bytes32[](requests.length);
-        for (uint256 i = 0; i < requests.length; i++) {
-            signals[i] = keccak256(abi.encode(requests[i], outputs[i]));
-        }
+        // Hash the requests and outputs
+        bytes32 signalRequestsRoot = keccak256(abi.encode(requests, outputs));
 
-        // Generate Merkle root
-        bytes32 root = MerkleTree.generateTree(signals);
-
-        // Verify against stored root
-        if (!ISignalReceiver(signalReceiver).signalReceived(root)) revert SignalDoesNotExist();
+        // Verify against stored root in the L2 contract
+        if (!ISignalReceiver(signalReceiver).signalReceived(signalRequestsRoot)) revert SignalDoesNotExist();
 
         // Store each request's output
         for (uint256 i = 0; i < requests.length; i++) {

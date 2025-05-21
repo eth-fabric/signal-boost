@@ -9,7 +9,6 @@ import {ISignalBoost} from "../src/interfaces/ISignalBoost.sol";
 import {IBatcher} from "../src/interfaces/IBatcher.sol";
 import {IBatcherBase} from "../src/interfaces/IBatcherBase.sol";
 import {Batcher} from "../src/Batcher.sol";
-import {MerkleTree} from "../src/lib/MerkleTree.sol";
 import {SignalBoostTester} from "./DummyContracts.sol";
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
@@ -341,6 +340,9 @@ contract BatcherWithSignalBoostTest is BatcherHelpers {
 
         // Verify the signal was sent
         bytes32 signal = signalBoost.lastSignal();
-        assertEq(signal, keccak256(abi.encode(requests[0], abi.encode(price))), "signal was not sent");
+        bytes[] memory outputs = new bytes[](1);
+        outputs[0] = abi.encode(price);
+        bytes32 signalRequestsRoot = keccak256(abi.encode(requests, outputs));
+        assertEq(signal, signalRequestsRoot, "signal was not sent");
     }
 }

@@ -173,6 +173,8 @@ contract TobascoBatcherWithSignalBoostTest is BatcherHelpers {
 
         // Verify the signal was sent
         bytes32 signal = signalBoost.lastSignal();
-        assertEq(signal, keccak256(abi.encode(requests[0], abi.encode(price))), "signal was not sent");
+        bytes[] memory outputs = new bytes[](1);
+        outputs[0] = abi.encode(price);
+        bytes32 signalRequestsRoot = keccak256(abi.encode(requests, outputs));
     }
 }

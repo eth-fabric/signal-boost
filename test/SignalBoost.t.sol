@@ -5,7 +5,6 @@ import {Test} from "forge-std/Test.sol";
 import {DummyViewContract, SignalBoostTester} from "./DummyContracts.sol";
 import {SignalBoost} from "../src/SignalBoost.sol";
 import {ISignalBoost} from "../src/interfaces/ISignalBoost.sol";
-import {MerkleTree} from "../src/lib/MerkleTree.sol";
 
 contract SignalBoostTest is Test {
     SignalBoostTester public signalBoost;
@@ -54,29 +53,24 @@ contract SignalBoostTest is Test {
         assertEq(signalBoost.lastSignal(), root);
     }
 
-    function test_VerifyMerkleRoot() public {
+    function test_VerifySignal() public {
         // Write signals
         (ISignalBoost.SignalRequest[] memory requests, bytes32 expectedRoot) = writeSignals();
-
-        // Get the individual signal hashes
-        bytes32[] memory signals = new bytes32[](3);
+        bytes[] memory outputs = new bytes[](requests.length);
 
         // Get uint256 signal
-        bytes memory output0 = abi.encode(dummyContract.getDummyUint());
-        signals[0] = keccak256(abi.encode(requests[0], output0));
+        outputs[0] = abi.encode(dummyContract.getDummyUint());
 
         // Get bytes signal
-        bytes memory output1 = abi.encode(dummyContract.getDummyBytes());
-        signals[1] = keccak256(abi.encode(requests[1], output1));
+        outputs[1] = abi.encode(dummyContract.getDummyBytes());
 
         // Get bytes32 signal
-        bytes memory output2 = abi.encode(dummyContract.getDummyBytes32());
-        signals[2] = keccak256(abi.encode(requests[2], output2));
+        outputs[2] = abi.encode(dummyContract.getDummyBytes32());
 
-        // Generate Merkle root locally
-        bytes32 localRoot = MerkleTree.generateTree(signals);
+        // Hash the requests and outputs
+        bytes32 signalRequestsRoot = keccak256(abi.encode(requests, outputs));
 
         // Verify that both roots match
-        assertEq(localRoot, expectedRoot, "Merkle roots do not match");
+        assertEq(signalRequestsRoot, expectedRoot, "Signal requests roots do not match");
     }
 }
