@@ -20,4 +20,4 @@ Signal-Boost is a set of L1 contracts for rollups to synchronously read L1 data 
 - **SignalBoostOpStack.sol**: OP Stack-specific implementation that uses Optimism's `CrossDomainMessenger` for cross-chain messaging.
 
 ### Disclaimer
-This project is not audited and is not ready for production use. Please see Terms of Use (https://github.com/Commit-Boost/commit-boost-client/blob/main/TERMS-OF-USE.md) for more details.
+This project is not audited and is not ready for production use. Please see [Terms of Use](https://github.com/Commit-Boost/commit-boost-client/blob/main/TERMS-OF-USE.md) for more details.
